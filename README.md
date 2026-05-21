@@ -10,3 +10,4 @@
 
 - TODO: how to start docker compose
 - TODO: how to run migrations
+- TODO: when to run `go generate`
