@@ -1,5 +1,6 @@
 package: api
 generate:
-  std-http-server: true
+  gin-server: true
   models: true
+  strict-server: true
 output: api/gen.go
