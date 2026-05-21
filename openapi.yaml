@@ -1,0 +1,144 @@
+openapi: "3.0.3"
+info:
+  version: 1.0.0
+  title: User Analytics Service REST API
+
+paths:
+  /api/livez:
+    get:
+      description: liveness check - checks if process is deadlocked
+      responses:
+        "200":
+          description: process is running fine
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: string
+
+  /api/readyz:
+    get:
+      description: readiness check - checks if process can handle traffic (also considers downstream dependencies)
+      responses:
+        "200":
+          description: process is ready to handle traffic
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: string
+
+  /api/v1/logins:
+    post:
+      description: ingest a user login event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user_id
+                - login_time
+              properties:
+                user_id:
+                  type: string
+                  format: uuid
+                login_time:
+                  type: string
+                  format: date-time
+      responses:
+        "201":
+          description: login event recorded
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/analytics/users/daily/{day}:
+    get:
+      description: count of unique users for a given day (UTC)
+      parameters:
+        - name: day
+          in: path
+          required: true
+          schema:
+            type: string
+            format: date
+            example: "2026-05-21"
+      responses:
+        "200":
+          description: unique user count for the UTC day
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: integer
+        "400":
+          description: invalid date format or future date
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/analytics/users/monthly/{month}:
+    get:
+      description: count of unique users for a given UTC month
+      parameters:
+        - name: month
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "2026-05"
+      responses:
+        "200":
+          description: unique user count for the month
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: integer
+        "400":
+          description: invalid month format or future month
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    ErrorResponse: # loosely based on RFC9457
+      type: object
+      required:
+        - type
+        - title
+        - status
+      properties:
+        type:
+          type: string
+          format: uri
+          description: A URI reference that identifies the problem type.
+        title:
+          type: string
+          description: A short, human-readable summary of the problem.
+        status:
+          type: integer
+          description: The HTTP status code generated for this occurrence.
+        detail:
+          type: string
+          description: A human-readable explanation specific to this occurrence.
+        instance:
+          type: string
+          format: uri
+          description: A URI reference for this specific occurrence (e.g. trace ID).

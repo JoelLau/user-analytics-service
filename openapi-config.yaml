@@ -1,5 +1,6 @@
-package: api
+package: server
 generate:
-  std-http-server: true
+  chi-server: true
   models: true
-output: api/gen.go
+  strict-server: true
+output: server/api.gen.go
