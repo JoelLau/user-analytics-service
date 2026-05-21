@@ -17,5 +17,20 @@ services:
       timeout: 5s
       retries: 5
 
+  goose-migrations:
+    image: kukymbr/goose-docker:3.27.0
+    container_name: user_analytics_goose_migrations
+    env_file:
+      - .env
+    environment:
+      - GOOSE_DRIVER=postgres
+      - GOOSE_DBSTRING=host=user-analytics-db user=${POSTGRES_USER} password=${POSTGRES_PASSWORD} dbname=${POSTGRES_DB} port=${POSTGRES_PORT} sslmode=disable
+      - GOOSE_COMMAND=up
+    volumes:
+      - ./migrations/:/migrations
+    depends_on:
+      user-analytics-db:
+        condition: service_healthy
+
 volumes:
   user_analytics_data:

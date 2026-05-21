@@ -1,6 +1,4 @@
 # User Analytics Service
-<<<<<<< Updated upstream
-=======
 
 ## Pre-requisites
 
@@ -13,4 +11,3 @@
 - TODO: how to start docker compose
 - TODO: how to run migrations
 - TODO: when to run `go generate`
->>>>>>> Stashed changes
