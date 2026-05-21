@@ -11,5 +11,5 @@ func NewSlogger(debug bool) *slog.Logger {
 		level = slog.LevelDebug
 	}
 
-	return slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: level, AddSource: true}))
+	return slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{Level: level, AddSource: true}))
 }
