@@ -5,38 +5,44 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 	"user-analytics/config"
 	"user-analytics/server"
-
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	slogchi "github.com/samber/slog-chi"
 )
 
+const shutdownTimeout = 10 * time.Second
+
 func main() {
-	ctx := context.Background()
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
 	cfg := config.Init(ctx)
-
-	slog.InfoContext(ctx, "starting..")
-
-	serverImpl := server.NewServer()
-	strictHandler := server.NewStrictHandler(serverImpl, nil)
-
-	r := chi.NewRouter()
-	r.Use(slogchi.New(slog.Default()))
-	r.Use(middleware.Recoverer)
+	logr := cfg.Logger()
+	logr.InfoContext(ctx, "starting..")
 
 	srv := &http.Server{
-		Handler: r,
+		Handler: server.NewHandler(logr),
 		Addr:    cfg.Address,
 	}
 
-	server.HandlerFromMux(strictHandler, r)
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			slog.ErrorContext(ctx, "unexpected server shutdown", slog.Any("error", err))
+		}
+	}()
 
-	if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-		slog.ErrorContext(ctx, "unexpected server shutdown", slog.Any("error", err))
-		return
+	<-ctx.Done()
+	stop()
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+	defer cancel()
+
+	if err := srv.Shutdown(shutdownCtx); err != nil {
+		logr.ErrorContext(shutdownCtx, "server shutdown error", slog.Any("error", err))
 	}
 
-	slog.InfoContext(ctx, "exiting..")
+	logr.InfoContext(shutdownCtx, "exiting..")
 }

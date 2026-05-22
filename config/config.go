@@ -27,8 +27,6 @@ func Init(ctx context.Context) Config {
 
 	slog.InfoContext(ctx, "env-ed", slog.Any("cfg", cfg))
 
-	slog.SetDefault(NewSlogger(cfg.DebugMode))
-
 	return cfg
 }
 
@@ -39,4 +37,8 @@ type Config struct {
 	PostgresPassword string `env:"POSTGRES_PASSWORD"` // (used for db connection) postgres password      e.g. "p@ssw0rd!123"
 	PostgresDb       string `env:"POSTGRES_DB"`       // (used for db connection) postgres database name e.g. "user_analytics"
 	PostgresPort     int    `env:"POSTGRES_PORT"`     // (used for db connection) postgres port          e.g. "5432"
+}
+
+func (cfg *Config) Logger() *slog.Logger {
+	return NewSlogger(cfg.DebugMode)
 }
