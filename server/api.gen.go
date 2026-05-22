@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/oapi-codegen/runtime"
@@ -34,15 +33,6 @@ type ErrorResponse struct {
 	Type string `json:"type"`
 }
 
-// RecordLoginJSONBody defines parameters for RecordLogin.
-type RecordLoginJSONBody struct {
-	LoginTime time.Time          `json:"login_time"`
-	UserId    openapi_types.UUID `json:"user_id"`
-}
-
-// RecordLoginJSONRequestBody defines body for RecordLogin for application/json ContentType.
-type RecordLoginJSONRequestBody RecordLoginJSONBody
-
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 
@@ -57,9 +47,6 @@ type ServerInterface interface {
 
 	// (GET /api/v1/analytics/users/monthly/{month})
 	GetMonthlyUniqueUsers(w http.ResponseWriter, r *http.Request, month string)
-
-	// (POST /api/v1/logins)
-	RecordLogin(w http.ResponseWriter, r *http.Request)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
@@ -83,11 +70,6 @@ func (_ Unimplemented) GetDailyUniqueUsers(w http.ResponseWriter, r *http.Reques
 
 // (GET /api/v1/analytics/users/monthly/{month})
 func (_ Unimplemented) GetMonthlyUniqueUsers(w http.ResponseWriter, r *http.Request, month string) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// (POST /api/v1/logins)
-func (_ Unimplemented) RecordLogin(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -171,20 +153,6 @@ func (siw *ServerInterfaceWrapper) GetMonthlyUniqueUsers(w http.ResponseWriter, 
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetMonthlyUniqueUsers(w, r, month)
-	}))
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// RecordLogin operation middleware
-func (siw *ServerInterfaceWrapper) RecordLogin(w http.ResponseWriter, r *http.Request) {
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.RecordLogin(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -318,9 +286,6 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/api/v1/analytics/users/monthly/{month}", wrapper.GetMonthlyUniqueUsers)
-	})
-	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/api/v1/logins", wrapper.RecordLogin)
 	})
 
 	return r
@@ -462,36 +427,6 @@ func (response GetMonthlyUniqueUsers400JSONResponse) VisitGetMonthlyUniqueUsersR
 	return err
 }
 
-type RecordLoginRequestObject struct {
-	Body *RecordLoginJSONRequestBody
-}
-
-type RecordLoginResponseObject interface {
-	VisitRecordLoginResponse(w http.ResponseWriter) error
-}
-
-type RecordLogin201Response struct {
-}
-
-func (response RecordLogin201Response) VisitRecordLoginResponse(w http.ResponseWriter) error {
-	w.WriteHeader(201)
-	return nil
-}
-
-type RecordLogin400JSONResponse ErrorResponse
-
-func (response RecordLogin400JSONResponse) VisitRecordLoginResponse(w http.ResponseWriter) error {
-
-	var buf bytes.Buffer
-	if err := json.NewEncoder(&buf).Encode(response); err != nil {
-		return err
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-	_, err := buf.WriteTo(w)
-	return err
-}
-
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 
@@ -506,9 +441,6 @@ type StrictServerInterface interface {
 
 	// (GET /api/v1/analytics/users/monthly/{month})
 	GetMonthlyUniqueUsers(ctx context.Context, request GetMonthlyUniqueUsersRequestObject) (GetMonthlyUniqueUsersResponseObject, error)
-
-	// (POST /api/v1/logins)
-	RecordLogin(ctx context.Context, request RecordLoginRequestObject) (RecordLoginResponseObject, error)
 }
 
 type StrictHandlerFunc func(ctx context.Context, w http.ResponseWriter, r *http.Request, request any) (any, error)
@@ -633,37 +565,6 @@ func (sh *strictHandler) GetMonthlyUniqueUsers(w http.ResponseWriter, r *http.Re
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetMonthlyUniqueUsersResponseObject); ok {
 		if err := validResponse.VisitGetMonthlyUniqueUsersResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// RecordLogin operation middleware
-func (sh *strictHandler) RecordLogin(w http.ResponseWriter, r *http.Request) {
-	var request RecordLoginRequestObject
-
-	var body RecordLoginJSONRequestBody
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
-		return
-	}
-	request.Body = &body
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.RecordLogin(ctx, request.(RecordLoginRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "RecordLogin")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(RecordLoginResponseObject); ok {
-		if err := validResponse.VisitRecordLoginResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

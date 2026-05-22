@@ -50,8 +50,3 @@ func (s *Server) GetMonthlyUniqueUsers(ctx context.Context, request GetMonthlyUn
 	return GetMonthlyUniqueUsers200JSONResponse{}, nil
 
 }
-
-// (POST /api/v1/logins)
-func (s *Server) RecordLogin(ctx context.Context, request RecordLoginRequestObject) (RecordLoginResponseObject, error) {
-	return RecordLogin201Response{}, nil
-}

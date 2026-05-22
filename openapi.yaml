@@ -40,36 +40,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
-  /api/v1/logins:
-    post:
-      operationId: RecordLogin
-      description: ingest a user login event
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - user_id
-                - login_time
-              properties:
-                user_id:
-                  type: string
-                  format: uuid
-                login_time:
-                  type: string
-                  format: date-time
-      responses:
-        "201":
-          description: login event recorded
-        "400":
-          description: invalid request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-
   /api/v1/analytics/users/daily/{day}:
     get:
       operationId: GetDailyUniqueUsers
