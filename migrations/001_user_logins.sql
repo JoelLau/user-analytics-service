@@ -9,4 +9,4 @@ COMMENT ON TABLE  user_logins              IS 'append-only event log of user log
 COMMENT ON COLUMN user_logins.user_id      IS 'user identifier - each unique value represents one user.';
 COMMENT ON COLUMN user_logins.logged_in_at IS 'provided by the database at insert time; avoid supplying value on insertion';
 
-CREATE INDEX ON user_logins (user_id, login_time);
+CREATE INDEX ON user_logins (user_id, logged_in_at);
