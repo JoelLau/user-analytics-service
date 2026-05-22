@@ -62,3 +62,9 @@ I may have been to eager to jump to the conclusion that a REST API is required.
 > Design decisions and assumptions.
 
 write design and decision docs
+
+## Conclusions
+
+- write design docs
+- create a http server, name the handler functions as recommended
+- include tests where possible

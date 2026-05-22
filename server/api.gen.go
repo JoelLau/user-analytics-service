@@ -34,32 +34,32 @@ type ErrorResponse struct {
 	Type string `json:"type"`
 }
 
-// PostApiV1LoginsJSONBody defines parameters for PostApiV1Logins.
-type PostApiV1LoginsJSONBody struct {
+// RecordLoginJSONBody defines parameters for RecordLogin.
+type RecordLoginJSONBody struct {
 	LoginTime time.Time          `json:"login_time"`
 	UserId    openapi_types.UUID `json:"user_id"`
 }
 
-// PostApiV1LoginsJSONRequestBody defines body for PostApiV1Logins for application/json ContentType.
-type PostApiV1LoginsJSONRequestBody PostApiV1LoginsJSONBody
+// RecordLoginJSONRequestBody defines body for RecordLogin for application/json ContentType.
+type RecordLoginJSONRequestBody RecordLoginJSONBody
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 
 	// (GET /api/livez)
-	GetApiLivez(w http.ResponseWriter, r *http.Request)
+	Livez(w http.ResponseWriter, r *http.Request)
 
 	// (GET /api/readyz)
-	GetApiReadyz(w http.ResponseWriter, r *http.Request)
+	Readyz(w http.ResponseWriter, r *http.Request)
 
 	// (GET /api/v1/analytics/users/daily/{day})
-	GetApiV1AnalyticsUsersDailyDay(w http.ResponseWriter, r *http.Request, day openapi_types.Date)
+	GetDailyUniqueUsers(w http.ResponseWriter, r *http.Request, day openapi_types.Date)
 
 	// (GET /api/v1/analytics/users/monthly/{month})
-	GetApiV1AnalyticsUsersMonthlyMonth(w http.ResponseWriter, r *http.Request, month string)
+	GetMonthlyUniqueUsers(w http.ResponseWriter, r *http.Request, month string)
 
 	// (POST /api/v1/logins)
-	PostApiV1Logins(w http.ResponseWriter, r *http.Request)
+	RecordLogin(w http.ResponseWriter, r *http.Request)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
@@ -67,27 +67,27 @@ type ServerInterface interface {
 type Unimplemented struct{}
 
 // (GET /api/livez)
-func (_ Unimplemented) GetApiLivez(w http.ResponseWriter, r *http.Request) {
+func (_ Unimplemented) Livez(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // (GET /api/readyz)
-func (_ Unimplemented) GetApiReadyz(w http.ResponseWriter, r *http.Request) {
+func (_ Unimplemented) Readyz(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // (GET /api/v1/analytics/users/daily/{day})
-func (_ Unimplemented) GetApiV1AnalyticsUsersDailyDay(w http.ResponseWriter, r *http.Request, day openapi_types.Date) {
+func (_ Unimplemented) GetDailyUniqueUsers(w http.ResponseWriter, r *http.Request, day openapi_types.Date) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // (GET /api/v1/analytics/users/monthly/{month})
-func (_ Unimplemented) GetApiV1AnalyticsUsersMonthlyMonth(w http.ResponseWriter, r *http.Request, month string) {
+func (_ Unimplemented) GetMonthlyUniqueUsers(w http.ResponseWriter, r *http.Request, month string) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // (POST /api/v1/logins)
-func (_ Unimplemented) PostApiV1Logins(w http.ResponseWriter, r *http.Request) {
+func (_ Unimplemented) RecordLogin(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -100,11 +100,11 @@ type ServerInterfaceWrapper struct {
 
 type MiddlewareFunc func(http.Handler) http.Handler
 
-// GetApiLivez operation middleware
-func (siw *ServerInterfaceWrapper) GetApiLivez(w http.ResponseWriter, r *http.Request) {
+// Livez operation middleware
+func (siw *ServerInterfaceWrapper) Livez(w http.ResponseWriter, r *http.Request) {
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetApiLivez(w, r)
+		siw.Handler.Livez(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -114,11 +114,11 @@ func (siw *ServerInterfaceWrapper) GetApiLivez(w http.ResponseWriter, r *http.Re
 	handler.ServeHTTP(w, r)
 }
 
-// GetApiReadyz operation middleware
-func (siw *ServerInterfaceWrapper) GetApiReadyz(w http.ResponseWriter, r *http.Request) {
+// Readyz operation middleware
+func (siw *ServerInterfaceWrapper) Readyz(w http.ResponseWriter, r *http.Request) {
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetApiReadyz(w, r)
+		siw.Handler.Readyz(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -128,8 +128,8 @@ func (siw *ServerInterfaceWrapper) GetApiReadyz(w http.ResponseWriter, r *http.R
 	handler.ServeHTTP(w, r)
 }
 
-// GetApiV1AnalyticsUsersDailyDay operation middleware
-func (siw *ServerInterfaceWrapper) GetApiV1AnalyticsUsersDailyDay(w http.ResponseWriter, r *http.Request) {
+// GetDailyUniqueUsers operation middleware
+func (siw *ServerInterfaceWrapper) GetDailyUniqueUsers(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 	_ = err
@@ -144,7 +144,7 @@ func (siw *ServerInterfaceWrapper) GetApiV1AnalyticsUsersDailyDay(w http.Respons
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetApiV1AnalyticsUsersDailyDay(w, r, day)
+		siw.Handler.GetDailyUniqueUsers(w, r, day)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -154,8 +154,8 @@ func (siw *ServerInterfaceWrapper) GetApiV1AnalyticsUsersDailyDay(w http.Respons
 	handler.ServeHTTP(w, r)
 }
 
-// GetApiV1AnalyticsUsersMonthlyMonth operation middleware
-func (siw *ServerInterfaceWrapper) GetApiV1AnalyticsUsersMonthlyMonth(w http.ResponseWriter, r *http.Request) {
+// GetMonthlyUniqueUsers operation middleware
+func (siw *ServerInterfaceWrapper) GetMonthlyUniqueUsers(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 	_ = err
@@ -170,7 +170,7 @@ func (siw *ServerInterfaceWrapper) GetApiV1AnalyticsUsersMonthlyMonth(w http.Res
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetApiV1AnalyticsUsersMonthlyMonth(w, r, month)
+		siw.Handler.GetMonthlyUniqueUsers(w, r, month)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -180,11 +180,11 @@ func (siw *ServerInterfaceWrapper) GetApiV1AnalyticsUsersMonthlyMonth(w http.Res
 	handler.ServeHTTP(w, r)
 }
 
-// PostApiV1Logins operation middleware
-func (siw *ServerInterfaceWrapper) PostApiV1Logins(w http.ResponseWriter, r *http.Request) {
+// RecordLogin operation middleware
+func (siw *ServerInterfaceWrapper) RecordLogin(w http.ResponseWriter, r *http.Request) {
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PostApiV1Logins(w, r)
+		siw.Handler.RecordLogin(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -308,36 +308,36 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	}
 
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/api/livez", wrapper.GetApiLivez)
+		r.Get(options.BaseURL+"/api/livez", wrapper.Livez)
 	})
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/api/readyz", wrapper.GetApiReadyz)
+		r.Get(options.BaseURL+"/api/readyz", wrapper.Readyz)
 	})
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/api/v1/analytics/users/daily/{day}", wrapper.GetApiV1AnalyticsUsersDailyDay)
+		r.Get(options.BaseURL+"/api/v1/analytics/users/daily/{day}", wrapper.GetDailyUniqueUsers)
 	})
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/api/v1/analytics/users/monthly/{month}", wrapper.GetApiV1AnalyticsUsersMonthlyMonth)
+		r.Get(options.BaseURL+"/api/v1/analytics/users/monthly/{month}", wrapper.GetMonthlyUniqueUsers)
 	})
 	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/api/v1/logins", wrapper.PostApiV1Logins)
+		r.Post(options.BaseURL+"/api/v1/logins", wrapper.RecordLogin)
 	})
 
 	return r
 }
 
-type GetApiLivezRequestObject struct {
+type LivezRequestObject struct {
 }
 
-type GetApiLivezResponseObject interface {
-	VisitGetApiLivezResponse(w http.ResponseWriter) error
+type LivezResponseObject interface {
+	VisitLivezResponse(w http.ResponseWriter) error
 }
 
-type GetApiLivez200JSONResponse struct {
+type Livez200JSONResponse struct {
 	Data *string `json:"data,omitempty"`
 }
 
-func (response GetApiLivez200JSONResponse) VisitGetApiLivezResponse(w http.ResponseWriter) error {
+func (response Livez200JSONResponse) VisitLivezResponse(w http.ResponseWriter) error {
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(response); err != nil {
@@ -349,18 +349,18 @@ func (response GetApiLivez200JSONResponse) VisitGetApiLivezResponse(w http.Respo
 	return err
 }
 
-type GetApiReadyzRequestObject struct {
+type ReadyzRequestObject struct {
 }
 
-type GetApiReadyzResponseObject interface {
-	VisitGetApiReadyzResponse(w http.ResponseWriter) error
+type ReadyzResponseObject interface {
+	VisitReadyzResponse(w http.ResponseWriter) error
 }
 
-type GetApiReadyz200JSONResponse struct {
+type Readyz200JSONResponse struct {
 	Data *string `json:"data,omitempty"`
 }
 
-func (response GetApiReadyz200JSONResponse) VisitGetApiReadyzResponse(w http.ResponseWriter) error {
+func (response Readyz200JSONResponse) VisitReadyzResponse(w http.ResponseWriter) error {
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(response); err != nil {
@@ -372,19 +372,19 @@ func (response GetApiReadyz200JSONResponse) VisitGetApiReadyzResponse(w http.Res
 	return err
 }
 
-type GetApiV1AnalyticsUsersDailyDayRequestObject struct {
+type GetDailyUniqueUsersRequestObject struct {
 	Day openapi_types.Date `json:"day"`
 }
 
-type GetApiV1AnalyticsUsersDailyDayResponseObject interface {
-	VisitGetApiV1AnalyticsUsersDailyDayResponse(w http.ResponseWriter) error
+type GetDailyUniqueUsersResponseObject interface {
+	VisitGetDailyUniqueUsersResponse(w http.ResponseWriter) error
 }
 
-type GetApiV1AnalyticsUsersDailyDay200JSONResponse struct {
+type GetDailyUniqueUsers200JSONResponse struct {
 	Data *int `json:"data,omitempty"`
 }
 
-func (response GetApiV1AnalyticsUsersDailyDay200JSONResponse) VisitGetApiV1AnalyticsUsersDailyDayResponse(w http.ResponseWriter) error {
+func (response GetDailyUniqueUsers200JSONResponse) VisitGetDailyUniqueUsersResponse(w http.ResponseWriter) error {
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(response); err != nil {
@@ -396,9 +396,9 @@ func (response GetApiV1AnalyticsUsersDailyDay200JSONResponse) VisitGetApiV1Analy
 	return err
 }
 
-type GetApiV1AnalyticsUsersDailyDay400JSONResponse ErrorResponse
+type GetDailyUniqueUsers400JSONResponse ErrorResponse
 
-func (response GetApiV1AnalyticsUsersDailyDay400JSONResponse) VisitGetApiV1AnalyticsUsersDailyDayResponse(w http.ResponseWriter) error {
+func (response GetDailyUniqueUsers400JSONResponse) VisitGetDailyUniqueUsersResponse(w http.ResponseWriter) error {
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(response); err != nil {
@@ -410,19 +410,19 @@ func (response GetApiV1AnalyticsUsersDailyDay400JSONResponse) VisitGetApiV1Analy
 	return err
 }
 
-type GetApiV1AnalyticsUsersMonthlyMonthRequestObject struct {
+type GetMonthlyUniqueUsersRequestObject struct {
 	Month string `json:"month"`
 }
 
-type GetApiV1AnalyticsUsersMonthlyMonthResponseObject interface {
-	VisitGetApiV1AnalyticsUsersMonthlyMonthResponse(w http.ResponseWriter) error
+type GetMonthlyUniqueUsersResponseObject interface {
+	VisitGetMonthlyUniqueUsersResponse(w http.ResponseWriter) error
 }
 
-type GetApiV1AnalyticsUsersMonthlyMonth200JSONResponse struct {
+type GetMonthlyUniqueUsers200JSONResponse struct {
 	Data *int `json:"data,omitempty"`
 }
 
-func (response GetApiV1AnalyticsUsersMonthlyMonth200JSONResponse) VisitGetApiV1AnalyticsUsersMonthlyMonthResponse(w http.ResponseWriter) error {
+func (response GetMonthlyUniqueUsers200JSONResponse) VisitGetMonthlyUniqueUsersResponse(w http.ResponseWriter) error {
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(response); err != nil {
@@ -434,9 +434,9 @@ func (response GetApiV1AnalyticsUsersMonthlyMonth200JSONResponse) VisitGetApiV1A
 	return err
 }
 
-type GetApiV1AnalyticsUsersMonthlyMonth400JSONResponse ErrorResponse
+type GetMonthlyUniqueUsers400JSONResponse ErrorResponse
 
-func (response GetApiV1AnalyticsUsersMonthlyMonth400JSONResponse) VisitGetApiV1AnalyticsUsersMonthlyMonthResponse(w http.ResponseWriter) error {
+func (response GetMonthlyUniqueUsers400JSONResponse) VisitGetMonthlyUniqueUsersResponse(w http.ResponseWriter) error {
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(response); err != nil {
@@ -448,25 +448,25 @@ func (response GetApiV1AnalyticsUsersMonthlyMonth400JSONResponse) VisitGetApiV1A
 	return err
 }
 
-type PostApiV1LoginsRequestObject struct {
-	Body *PostApiV1LoginsJSONRequestBody
+type RecordLoginRequestObject struct {
+	Body *RecordLoginJSONRequestBody
 }
 
-type PostApiV1LoginsResponseObject interface {
-	VisitPostApiV1LoginsResponse(w http.ResponseWriter) error
+type RecordLoginResponseObject interface {
+	VisitRecordLoginResponse(w http.ResponseWriter) error
 }
 
-type PostApiV1Logins201Response struct {
+type RecordLogin201Response struct {
 }
 
-func (response PostApiV1Logins201Response) VisitPostApiV1LoginsResponse(w http.ResponseWriter) error {
+func (response RecordLogin201Response) VisitRecordLoginResponse(w http.ResponseWriter) error {
 	w.WriteHeader(201)
 	return nil
 }
 
-type PostApiV1Logins400JSONResponse ErrorResponse
+type RecordLogin400JSONResponse ErrorResponse
 
-func (response PostApiV1Logins400JSONResponse) VisitPostApiV1LoginsResponse(w http.ResponseWriter) error {
+func (response RecordLogin400JSONResponse) VisitRecordLoginResponse(w http.ResponseWriter) error {
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(response); err != nil {
@@ -482,19 +482,19 @@ func (response PostApiV1Logins400JSONResponse) VisitPostApiV1LoginsResponse(w ht
 type StrictServerInterface interface {
 
 	// (GET /api/livez)
-	GetApiLivez(ctx context.Context, request GetApiLivezRequestObject) (GetApiLivezResponseObject, error)
+	Livez(ctx context.Context, request LivezRequestObject) (LivezResponseObject, error)
 
 	// (GET /api/readyz)
-	GetApiReadyz(ctx context.Context, request GetApiReadyzRequestObject) (GetApiReadyzResponseObject, error)
+	Readyz(ctx context.Context, request ReadyzRequestObject) (ReadyzResponseObject, error)
 
 	// (GET /api/v1/analytics/users/daily/{day})
-	GetApiV1AnalyticsUsersDailyDay(ctx context.Context, request GetApiV1AnalyticsUsersDailyDayRequestObject) (GetApiV1AnalyticsUsersDailyDayResponseObject, error)
+	GetDailyUniqueUsers(ctx context.Context, request GetDailyUniqueUsersRequestObject) (GetDailyUniqueUsersResponseObject, error)
 
 	// (GET /api/v1/analytics/users/monthly/{month})
-	GetApiV1AnalyticsUsersMonthlyMonth(ctx context.Context, request GetApiV1AnalyticsUsersMonthlyMonthRequestObject) (GetApiV1AnalyticsUsersMonthlyMonthResponseObject, error)
+	GetMonthlyUniqueUsers(ctx context.Context, request GetMonthlyUniqueUsersRequestObject) (GetMonthlyUniqueUsersResponseObject, error)
 
 	// (POST /api/v1/logins)
-	PostApiV1Logins(ctx context.Context, request PostApiV1LoginsRequestObject) (PostApiV1LoginsResponseObject, error)
+	RecordLogin(ctx context.Context, request RecordLoginRequestObject) (RecordLoginResponseObject, error)
 }
 
 type StrictHandlerFunc func(ctx context.Context, w http.ResponseWriter, r *http.Request, request any) (any, error)
@@ -526,23 +526,23 @@ type strictHandler struct {
 	options     StrictHTTPServerOptions
 }
 
-// GetApiLivez operation middleware
-func (sh *strictHandler) GetApiLivez(w http.ResponseWriter, r *http.Request) {
-	var request GetApiLivezRequestObject
+// Livez operation middleware
+func (sh *strictHandler) Livez(w http.ResponseWriter, r *http.Request) {
+	var request LivezRequestObject
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.GetApiLivez(ctx, request.(GetApiLivezRequestObject))
+		return sh.ssi.Livez(ctx, request.(LivezRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetApiLivez")
+		handler = middleware(handler, "Livez")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(GetApiLivezResponseObject); ok {
-		if err := validResponse.VisitGetApiLivezResponse(w); err != nil {
+	} else if validResponse, ok := response.(LivezResponseObject); ok {
+		if err := validResponse.VisitLivezResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -550,23 +550,23 @@ func (sh *strictHandler) GetApiLivez(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GetApiReadyz operation middleware
-func (sh *strictHandler) GetApiReadyz(w http.ResponseWriter, r *http.Request) {
-	var request GetApiReadyzRequestObject
+// Readyz operation middleware
+func (sh *strictHandler) Readyz(w http.ResponseWriter, r *http.Request) {
+	var request ReadyzRequestObject
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.GetApiReadyz(ctx, request.(GetApiReadyzRequestObject))
+		return sh.ssi.Readyz(ctx, request.(ReadyzRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetApiReadyz")
+		handler = middleware(handler, "Readyz")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(GetApiReadyzResponseObject); ok {
-		if err := validResponse.VisitGetApiReadyzResponse(w); err != nil {
+	} else if validResponse, ok := response.(ReadyzResponseObject); ok {
+		if err := validResponse.VisitReadyzResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -574,25 +574,25 @@ func (sh *strictHandler) GetApiReadyz(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GetApiV1AnalyticsUsersDailyDay operation middleware
-func (sh *strictHandler) GetApiV1AnalyticsUsersDailyDay(w http.ResponseWriter, r *http.Request, day openapi_types.Date) {
-	var request GetApiV1AnalyticsUsersDailyDayRequestObject
+// GetDailyUniqueUsers operation middleware
+func (sh *strictHandler) GetDailyUniqueUsers(w http.ResponseWriter, r *http.Request, day openapi_types.Date) {
+	var request GetDailyUniqueUsersRequestObject
 
 	request.Day = day
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.GetApiV1AnalyticsUsersDailyDay(ctx, request.(GetApiV1AnalyticsUsersDailyDayRequestObject))
+		return sh.ssi.GetDailyUniqueUsers(ctx, request.(GetDailyUniqueUsersRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetApiV1AnalyticsUsersDailyDay")
+		handler = middleware(handler, "GetDailyUniqueUsers")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(GetApiV1AnalyticsUsersDailyDayResponseObject); ok {
-		if err := validResponse.VisitGetApiV1AnalyticsUsersDailyDayResponse(w); err != nil {
+	} else if validResponse, ok := response.(GetDailyUniqueUsersResponseObject); ok {
+		if err := validResponse.VisitGetDailyUniqueUsersResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -600,25 +600,25 @@ func (sh *strictHandler) GetApiV1AnalyticsUsersDailyDay(w http.ResponseWriter, r
 	}
 }
 
-// GetApiV1AnalyticsUsersMonthlyMonth operation middleware
-func (sh *strictHandler) GetApiV1AnalyticsUsersMonthlyMonth(w http.ResponseWriter, r *http.Request, month string) {
-	var request GetApiV1AnalyticsUsersMonthlyMonthRequestObject
+// GetMonthlyUniqueUsers operation middleware
+func (sh *strictHandler) GetMonthlyUniqueUsers(w http.ResponseWriter, r *http.Request, month string) {
+	var request GetMonthlyUniqueUsersRequestObject
 
 	request.Month = month
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.GetApiV1AnalyticsUsersMonthlyMonth(ctx, request.(GetApiV1AnalyticsUsersMonthlyMonthRequestObject))
+		return sh.ssi.GetMonthlyUniqueUsers(ctx, request.(GetMonthlyUniqueUsersRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetApiV1AnalyticsUsersMonthlyMonth")
+		handler = middleware(handler, "GetMonthlyUniqueUsers")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(GetApiV1AnalyticsUsersMonthlyMonthResponseObject); ok {
-		if err := validResponse.VisitGetApiV1AnalyticsUsersMonthlyMonthResponse(w); err != nil {
+	} else if validResponse, ok := response.(GetMonthlyUniqueUsersResponseObject); ok {
+		if err := validResponse.VisitGetMonthlyUniqueUsersResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -626,11 +626,11 @@ func (sh *strictHandler) GetApiV1AnalyticsUsersMonthlyMonth(w http.ResponseWrite
 	}
 }
 
-// PostApiV1Logins operation middleware
-func (sh *strictHandler) PostApiV1Logins(w http.ResponseWriter, r *http.Request) {
-	var request PostApiV1LoginsRequestObject
+// RecordLogin operation middleware
+func (sh *strictHandler) RecordLogin(w http.ResponseWriter, r *http.Request) {
+	var request RecordLoginRequestObject
 
-	var body PostApiV1LoginsJSONRequestBody
+	var body RecordLoginJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
 		return
@@ -638,18 +638,18 @@ func (sh *strictHandler) PostApiV1Logins(w http.ResponseWriter, r *http.Request)
 	request.Body = &body
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.PostApiV1Logins(ctx, request.(PostApiV1LoginsRequestObject))
+		return sh.ssi.RecordLogin(ctx, request.(RecordLoginRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "PostApiV1Logins")
+		handler = middleware(handler, "RecordLogin")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(PostApiV1LoginsResponseObject); ok {
-		if err := validResponse.VisitPostApiV1LoginsResponse(w); err != nil {
+	} else if validResponse, ok := response.(RecordLoginResponseObject); ok {
+		if err := validResponse.VisitRecordLoginResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

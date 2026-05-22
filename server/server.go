@@ -11,26 +11,29 @@ func NewServer() *Server {
 type Server struct{}
 
 // (GET /api/livez)
-func (s *Server) GetApiLivez(ctx context.Context, request GetApiLivezRequestObject) (GetApiLivezResponseObject, error) {
-	return GetApiLivez200JSONResponse{}, nil
+func (s *Server) Livez(ctx context.Context, request LivezRequestObject) (LivezResponseObject, error) {
+	return Livez200JSONResponse{}, nil
+
 }
 
 // (GET /api/readyz)
-func (s *Server) GetApiReadyz(ctx context.Context, request GetApiReadyzRequestObject) (GetApiReadyzResponseObject, error) {
-	return GetApiReadyz200JSONResponse{}, nil
+func (s *Server) Readyz(ctx context.Context, request ReadyzRequestObject) (ReadyzResponseObject, error) {
+	return Readyz200JSONResponse{}, nil
 }
 
 // (GET /api/v1/analytics/users/daily/{day})
-func (s *Server) GetApiV1AnalyticsUsersDailyDay(ctx context.Context, request GetApiV1AnalyticsUsersDailyDayRequestObject) (GetApiV1AnalyticsUsersDailyDayResponseObject, error) {
-	return GetApiV1AnalyticsUsersDailyDay200JSONResponse{}, nil
+func (s *Server) GetDailyUniqueUsers(ctx context.Context, request GetDailyUniqueUsersRequestObject) (GetDailyUniqueUsersResponseObject, error) {
+	return GetDailyUniqueUsers200JSONResponse{}, nil
+
 }
 
 // (GET /api/v1/analytics/users/monthly/{month})
-func (s *Server) GetApiV1AnalyticsUsersMonthlyMonth(ctx context.Context, request GetApiV1AnalyticsUsersMonthlyMonthRequestObject) (GetApiV1AnalyticsUsersMonthlyMonthResponseObject, error) {
-	return GetApiV1AnalyticsUsersMonthlyMonth200JSONResponse{}, nil
+func (s *Server) GetMonthlyUniqueUsers(ctx context.Context, request GetMonthlyUniqueUsersRequestObject) (GetMonthlyUniqueUsersResponseObject, error) {
+	return GetMonthlyUniqueUsers200JSONResponse{}, nil
+
 }
 
 // (POST /api/v1/logins)
-func (s *Server) PostApiV1Logins(ctx context.Context, request PostApiV1LoginsRequestObject) (PostApiV1LoginsResponseObject, error) {
-	return PostApiV1Logins201Response{}, nil
+func (s *Server) RecordLogin(ctx context.Context, request RecordLoginRequestObject) (RecordLoginResponseObject, error) {
+	return RecordLogin201Response{}, nil
 }
