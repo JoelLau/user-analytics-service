@@ -11,6 +11,7 @@ import (
 var DefaultConfig = Config{
 	Address:          ":8080",
 	DebugMode:        false,
+	PostgresHost:     "localhost",
 	PostgresUser:     "postgres",
 	PostgresPassword: "password",
 	PostgresDb:       "postgres",
@@ -33,6 +34,7 @@ func Init(ctx context.Context) Config {
 type Config struct {
 	Address          string `env:"ADDRESS"`           // what address to serve the HTTP server           e.g. ":8080"
 	DebugMode        bool   `env:"DEBUG"`             // controls log verbosity                          e.g. false
+	PostgresHost     string `env:"POSTGRES_HOST"`     // (used for db connection) postgres host          e.g. "localhost"
 	PostgresUser     string `env:"POSTGRES_USER"`     // (used for db connection) postgres user          e.g. "john.doe"
 	PostgresPassword string `env:"POSTGRES_PASSWORD"` // (used for db connection) postgres password      e.g. "p@ssw0rd!123"
 	PostgresDb       string `env:"POSTGRES_DB"`       // (used for db connection) postgres database name e.g. "user_analytics"
@@ -44,6 +46,6 @@ func (cfg *Config) Logger() *slog.Logger {
 }
 
 func (cfg *Config) DSN() string {
-	return fmt.Sprintf("host=user-analytics-db user=%s password=%s dbname=%s port=%d sslmode=disable",
-		cfg.PostgresUser, cfg.PostgresPassword, cfg.PostgresDb, cfg.PostgresPort)
+	return fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable",
+		cfg.PostgresHost, cfg.PostgresUser, cfg.PostgresPassword, cfg.PostgresDb, cfg.PostgresPort)
 }

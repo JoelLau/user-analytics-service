@@ -9,6 +9,7 @@ import (
 
 func TestConfig_DSN(t *testing.T) {
 	cfg := config.Config{
+		PostgresHost:     "localhost",
 		PostgresUser:     "john.doe",
 		PostgresPassword: "p@ssw0rd!123",
 		PostgresDb:       "user-analytics",
@@ -16,7 +17,7 @@ func TestConfig_DSN(t *testing.T) {
 	}
 
 	assert.Equal(t,
-		"host=user-analytics-db user=john.doe password=p@ssw0rd!123 dbname=user-analytics port=5432 sslmode=disable",
+		"host=localhost user=john.doe password=p@ssw0rd!123 dbname=user-analytics port=5432 sslmode=disable",
 		cfg.DSN(),
 	)
 }
