@@ -42,3 +42,8 @@ type Config struct {
 func (cfg *Config) Logger() *slog.Logger {
 	return NewSlogger(cfg.DebugMode)
 }
+
+func (cfg *Config) DSN() string {
+	return fmt.Sprintf("host=user-analytics-db user=%s password=%s dbname=%s port=%d sslmode=disable",
+		cfg.PostgresUser, cfg.PostgresPassword, cfg.PostgresDb, cfg.PostgresPort)
+}
