@@ -11,6 +11,8 @@ import (
 	"time"
 	"user-analytics/config"
 	"user-analytics/server"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 const shutdownTimeout = 10 * time.Second
@@ -23,14 +25,21 @@ func main() {
 	logr := cfg.Logger()
 	logr.InfoContext(ctx, "starting..")
 
+	pool, err := pgxpool.New(ctx, cfg.DSN())
+	if err != nil {
+		logr.ErrorContext(ctx, "failed to create db pool", slog.Any("error", err))
+		return
+	}
+	defer pool.Close()
+
 	srv := &http.Server{
-		Handler: server.NewHandler(logr),
+		Handler: server.NewHandler(logr, pool),
 		Addr:    cfg.Address,
 	}
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			slog.ErrorContext(ctx, "unexpected server shutdown", slog.Any("error", err))
+			logr.ErrorContext(ctx, "unexpected server shutdown", slog.Any("error", err))
 		}
 	}()
 

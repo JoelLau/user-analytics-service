@@ -372,6 +372,20 @@ func (response Readyz200JSONResponse) VisitReadyzResponse(w http.ResponseWriter)
 	return err
 }
 
+type Readyz500JSONResponse ErrorResponse
+
+func (response Readyz500JSONResponse) VisitReadyzResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type GetDailyUniqueUsersRequestObject struct {
 	Day openapi_types.Date `json:"day"`
 }

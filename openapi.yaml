@@ -33,6 +33,12 @@ paths:
                 properties:
                   data:
                     type: string
+        "500":
+          description: process is not ready (downstream dependency unavailable)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /api/v1/logins:
     post:
