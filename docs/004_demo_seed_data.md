@@ -12,5 +12,4 @@ each user would login 0 - 3 times a day so we can demonstrate duplicate logins.
 
 ## Conclusion
 
-- go seed script has the benefits (atomicity, easy to modify, deterministic) with
-none of the downside (one large file that's hard to parse, might hit gh's limits)
+- used claude code to generate the seed script

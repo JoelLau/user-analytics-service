@@ -20,8 +20,6 @@ services:
   goose-migrations:
     image: kukymbr/goose-docker:3.27.0
     container_name: user_analytics_goose_migrations
-    env_file:
-      - .env
     environment:
       - GOOSE_DRIVER=postgres
       - GOOSE_DBSTRING=host=user-analytics-db user=${POSTGRES_USER} password=${POSTGRES_PASSWORD} dbname=${POSTGRES_DB} port=${POSTGRES_PORT} sslmode=disable
@@ -31,6 +29,20 @@ services:
     depends_on:
       user-analytics-db:
         condition: service_healthy
+
+  goose-seed:
+    image: kukymbr/goose-docker:3.27.0
+    container_name: user_analytics_goose_seed
+    environment:
+      - GOOSE_DRIVER=postgres
+      - GOOSE_DBSTRING=host=user-analytics-db user=${POSTGRES_USER} password=${POSTGRES_PASSWORD} dbname=${POSTGRES_DB} port=${POSTGRES_PORT} sslmode=disable
+      - GOOSE_COMMAND=up
+      - GOOSE_EXTRA_ARGS=-no-versioning
+    volumes:
+      - ./seed/:/migrations
+    depends_on:
+      goose-migrations:
+        condition: service_completed_successfully
 
 volumes:
   user_analytics_data:
