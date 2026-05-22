@@ -25,6 +25,11 @@ What external dependencies do I need?
       (subjective decision)
       - SQLC allows optimized queries and produces type-safe code
         - will skip "repository layer" that wraps SQLC in the interest of time
+- database set up:
+  - credentials / roles are out of scope
+  - migrations are part of requirements / documentation (also used by sqlc)
+  - using Goose as migration tool so i can seed demo data
+    - no "down" migrations because we're never going to revert
 
 ## Conclusions
 
