@@ -8,6 +8,9 @@
 
 ## Instructions
 
-- TODO: how to start docker compose
-- TODO: how to run migrations
-- TODO: when to run `go generate`
+1. create .env file `cp .env.example . env`
+    (modify where required)
+1. start external services (postgresql, migrations) `docker compose up -d`
+1. install dependencies `go mod tidy`
+1. generate database files (sqlc) and
+    server interface (oapi-codegen) `go generate ./...`

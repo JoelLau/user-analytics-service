@@ -23,6 +23,16 @@ func main() {
 	logr := cfg.Logger()
 	logr.InfoContext(ctx, "starting..")
 
+	server.HandlerFromMux(strictHandler, r)
+	return r
+}
+
+func main() {
+	ctx := context.Background()
+	cfg := config.Init(ctx)
+
+	slog.InfoContext(ctx, "starting..")
+
 	srv := &http.Server{
 		Handler: server.NewHandler(logr),
 		Addr:    cfg.Address,
