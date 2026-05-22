@@ -9,8 +9,12 @@ import (
 )
 
 var DefaultConfig = Config{
-	Address:   ":8080",
-	DebugMode: false,
+	Address:          ":8080",
+	DebugMode:        false,
+	PostgresUser:     "postgres",
+	PostgresPassword: "password",
+	PostgresDb:       "postgres",
+	PostgresPort:     5432,
 }
 
 // WARN: replaces global default logger
@@ -34,5 +38,5 @@ type Config struct {
 	PostgresUser     string `env:"POSTGRES_USER"`     // (used for db connection) postgres user          e.g. "john.doe"
 	PostgresPassword string `env:"POSTGRES_PASSWORD"` // (used for db connection) postgres password      e.g. "p@ssw0rd!123"
 	PostgresDb       string `env:"POSTGRES_DB"`       // (used for db connection) postgres database name e.g. "user_analytics"
-	PostgresPort     string `env:"POSTGRES_PORT"`     // (used for db connection) postgres port          e.g. "5432"
+	PostgresPort     int    `env:"POSTGRES_PORT"`     // (used for db connection) postgres port          e.g. "5432"
 }

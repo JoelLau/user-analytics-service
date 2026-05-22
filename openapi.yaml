@@ -6,6 +6,7 @@ info:
 paths:
   /api/livez:
     get:
+      operationId: Livez
       description: liveness check - checks if process is deadlocked
       responses:
         "200":
@@ -20,6 +21,7 @@ paths:
 
   /api/readyz:
     get:
+      operationId: Readyz
       description: readiness check - checks if process can handle traffic (also considers downstream dependencies)
       responses:
         "200":
@@ -34,6 +36,7 @@ paths:
 
   /api/v1/logins:
     post:
+      operationId: RecordLogin
       description: ingest a user login event
       requestBody:
         required: true
@@ -63,6 +66,7 @@ paths:
 
   /api/v1/analytics/users/daily/{day}:
     get:
+      operationId: GetDailyUniqueUsers
       description: count of unique users for a given day (UTC)
       parameters:
         - name: day
@@ -91,6 +95,7 @@ paths:
 
   /api/v1/analytics/users/monthly/{month}:
     get:
+      operationId: GetMonthlyUniqueUsers
       description: count of unique users for a given UTC month
       parameters:
         - name: month
