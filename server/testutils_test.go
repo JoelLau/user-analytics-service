@@ -20,6 +20,7 @@ func newPgContainer(t testing.TB, ctx context.Context) *postgres.PostgresContain
 		postgres.WithDatabase("test"),
 		postgres.WithUsername("user"),
 		postgres.WithPassword("password"),
+		postgres.BasicWaitStrategies(),
 	)
 	require.NoError(t, err)
 	t.Cleanup(func() { _ = pgCont.Terminate(context.Background()) })
