@@ -20,18 +20,9 @@ func main() {
 	defer stop()
 
 	cfg := config.Init(ctx)
+
 	logr := cfg.Logger()
-	logr.InfoContext(ctx, "starting..")
-
-	server.HandlerFromMux(strictHandler, r)
-	return r
-}
-
-func main() {
-	ctx := context.Background()
-	cfg := config.Init(ctx)
-
-	slog.InfoContext(ctx, "starting..")
+	logr.InfoContext(ctx, "starting ..")
 
 	srv := &http.Server{
 		Handler: server.NewHandler(logr),
@@ -40,7 +31,7 @@ func main() {
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			slog.ErrorContext(ctx, "unexpected server shutdown", slog.Any("error", err))
+			logr.ErrorContext(ctx, "unexpected server shutdown", slog.Any("error", err))
 		}
 	}()
 

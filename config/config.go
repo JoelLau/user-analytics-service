@@ -17,15 +17,12 @@ var DefaultConfig = Config{
 	PostgresPort:     5432,
 }
 
-// WARN: replaces global default logger
 func Init(ctx context.Context) Config {
 	cfg := DefaultConfig
 
 	if err := env.Feed(&cfg); err != nil {
 		panic(fmt.Errorf("failed to marshal envvars into struct:%w", err))
 	}
-
-	slog.InfoContext(ctx, "env-ed", slog.Any("cfg", cfg))
 
 	return cfg
 }
