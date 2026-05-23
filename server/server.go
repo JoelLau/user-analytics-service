@@ -18,7 +18,7 @@ type Server struct {
 
 // (GET /api/livez)
 func (s *Server) Livez(ctx context.Context, request LivezRequestObject) (LivezResponseObject, error) {
-	return Livez200JSONResponse{Data: ptr("ok")}, nil
+	return Livez200JSONResponse{Data: new("ok")}, nil
 }
 
 // (GET /api/readyz)
@@ -31,7 +31,7 @@ func (s *Server) Readyz(ctx context.Context, request ReadyzRequestObject) (Ready
 		}, nil
 	}
 
-	return Readyz200JSONResponse{Data: ptr("ok")}, nil
+	return Readyz200JSONResponse{Data: new("ok")}, nil
 }
 
 // (GET /api/v1/analytics/users/daily/{day})
@@ -43,12 +43,10 @@ func (s *Server) GetDailyUniqueUsers(ctx context.Context, request GetDailyUnique
 		return nil, err
 	}
 
-	return GetDailyUniqueUsers200JSONResponse{Data: ptr(int(count))}, nil
+	return GetDailyUniqueUsers200JSONResponse{Data: new(int(count))}, nil
 }
 
 // (GET /api/v1/analytics/users/monthly/{month})
 func (s *Server) GetMonthlyUniqueUsers(ctx context.Context, request GetMonthlyUniqueUsersRequestObject) (GetMonthlyUniqueUsersResponseObject, error) {
 	return GetMonthlyUniqueUsers200JSONResponse{}, nil
 }
-
-func ptr[T any](v T) *T { return new(v) }

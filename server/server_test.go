@@ -78,8 +78,8 @@ func TestGetDailyUniqueUsers_200OK(t *testing.T) {
 	insertUserLogins(t, pool, []queries.InsertUserLoginParams{
 		{UserID: 1, LoggedInAt: time.Date(2026, 3, 15, 8, 0, 0, 0, time.UTC)},
 		{UserID: 2, LoggedInAt: time.Date(2026, 3, 15, 8, 0, 0, 0, time.UTC)},
-		{UserID: 2, LoggedInAt: time.Date(2026, 3, 15, 20, 0, 0, 0, time.UTC)}, // same user same day — must not double-count
-		{UserID: 3, LoggedInAt: time.Date(2026, 3, 16, 8, 0, 0, 0, time.UTC)},  // different day — must be excluded
+		{UserID: 2, LoggedInAt: time.Date(2026, 3, 15, 20, 0, 0, 0, time.UTC)}, // duplicate login
+		{UserID: 3, LoggedInAt: time.Date(2026, 3, 16, 8, 0, 0, 0, time.UTC)},  // different day
 	})
 
 	// Act
@@ -96,4 +96,19 @@ func TestGetDailyUniqueUsers_200OK(t *testing.T) {
 	err = json.NewDecoder(resp.Body).Decode(&body)
 	require.NoErrorf(t, err, "failed to decode json response: %w", err)
 	require.Equal(t, 2, body.Data)
+}
+
+func TestGetDailyUniqueUsers_400BadRequest_InvalidDateFormat(t *testing.T) {
+	t.Parallel()
+
+	// Arrange
+	srv, _ := newTestServer(t)
+
+	// Act
+	resp, err := http.Get(fmt.Sprintf("%s/api/v1/analytics/users/daily/not-a-date", srv.URL))
+	require.NoErrorf(t, err, "error on http GET: %w", err)
+	defer resp.Body.Close()
+
+	// Assert
+	require.Equal(t, http.StatusBadRequest, resp.StatusCode)
 }
