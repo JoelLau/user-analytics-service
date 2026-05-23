@@ -3,15 +3,15 @@ package server
 import (
 	"log/slog"
 	"net/http"
+	"user-analytics/queries"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/jackc/pgx/v5/pgxpool"
 	slogchi "github.com/samber/slog-chi"
 )
 
-func NewHandler(slogger *slog.Logger, pool *pgxpool.Pool) http.Handler {
-	serverImpl := NewServer(pool)
+func NewHandler(slogger *slog.Logger, q *queries.Queries) http.Handler {
+	serverImpl := NewServer(q)
 	strictHandler := NewStrictHandler(serverImpl, nil)
 
 	r := chi.NewRouter()

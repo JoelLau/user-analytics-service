@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 	"user-analytics/config"
+	"user-analytics/queries"
 	"user-analytics/server"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -32,8 +33,10 @@ func main() {
 	}
 	defer pool.Close()
 
+	q := queries.New(pool)
+
 	srv := &http.Server{
-		Handler: server.NewHandler(logr, pool),
+		Handler: server.NewHandler(logr, q),
 		Addr:    cfg.Address,
 	}
 
