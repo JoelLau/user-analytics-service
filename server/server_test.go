@@ -161,6 +161,62 @@ func TestGetMonthlyUniqueUsers_200OK(t *testing.T) {
 	require.Equal(t, 2, body.Data)
 }
 
+func TestGetDailyUniqueUsers_200OK_DuplicateLogins(t *testing.T) {
+	t.Parallel()
+
+	// Arrange
+	srv, pool := newTestServer(t, NewFakeNower(time.Now()))
+
+	insertUserLogins(t, pool, []queries.InsertUserLoginParams{
+		{UserID: 1, LoggedInAt: time.Date(2026, 3, 15, 8, 0, 0, 0, time.UTC)},
+		{UserID: 1, LoggedInAt: time.Date(2026, 3, 15, 12, 0, 0, 0, time.UTC)},
+		{UserID: 1, LoggedInAt: time.Date(2026, 3, 15, 20, 0, 0, 0, time.UTC)},
+	})
+
+	// Act
+	resp, err := http.Get(fmt.Sprintf("%s/api/v1/analytics/users/daily/2026-03-15", srv.URL))
+	require.NoErrorf(t, err, "error on http GET: %w", err)
+	defer resp.Body.Close()
+
+	// Assert: same user logging in 3 times counts as 1
+	require.Equal(t, http.StatusOK, resp.StatusCode)
+
+	var body struct {
+		Data int `json:"data"`
+	}
+	err = json.NewDecoder(resp.Body).Decode(&body)
+	require.NoErrorf(t, err, "failed to decode json response: %w", err)
+	require.Equal(t, 1, body.Data)
+}
+
+func TestGetMonthlyUniqueUsers_200OK_DuplicateLogins(t *testing.T) {
+	t.Parallel()
+
+	// Arrange
+	srv, pool := newTestServer(t, NewFakeNower(time.Now()))
+
+	insertUserLogins(t, pool, []queries.InsertUserLoginParams{
+		{UserID: 1, LoggedInAt: time.Date(2026, 3, 1, 8, 0, 0, 0, time.UTC)},
+		{UserID: 1, LoggedInAt: time.Date(2026, 3, 15, 8, 0, 0, 0, time.UTC)},
+		{UserID: 1, LoggedInAt: time.Date(2026, 3, 31, 8, 0, 0, 0, time.UTC)},
+	})
+
+	// Act
+	resp, err := http.Get(fmt.Sprintf("%s/api/v1/analytics/users/monthly/2026-03", srv.URL))
+	require.NoErrorf(t, err, "error on http GET: %w", err)
+	defer resp.Body.Close()
+
+	// Assert: same user logging in across multiple days in a month counts as 1
+	require.Equal(t, http.StatusOK, resp.StatusCode)
+
+	var body struct {
+		Data int `json:"data"`
+	}
+	err = json.NewDecoder(resp.Body).Decode(&body)
+	require.NoErrorf(t, err, "failed to decode json response: %w", err)
+	require.Equal(t, 1, body.Data)
+}
+
 func TestGetMonthlyUniqueUsers_400BadRequest_InvalidDateFormat(t *testing.T) {
 	t.Parallel()
 
