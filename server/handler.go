@@ -12,8 +12,8 @@ import (
 	slogchi "github.com/samber/slog-chi"
 )
 
-func NewHandler(slogger *slog.Logger, q *queries.Queries) http.Handler {
-	serverImpl := NewServer(q)
+func NewHandler(slogger *slog.Logger, q *queries.Queries, n Nower) http.Handler {
+	serverImpl := NewServer(q, n)
 	strictHandler := NewStrictHandler(serverImpl, nil)
 
 	r := chi.NewRouter()

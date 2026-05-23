@@ -6,11 +6,12 @@ import (
 	"log/slog"
 	"net/http/httptest"
 	"testing"
+	"time"
 	"user-analytics/queries"
 	"user-analytics/server"
 
-	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jackc/pgx/v5/pgxpool"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/pressly/goose/v3"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
@@ -46,11 +47,12 @@ func runMigrations(t testing.TB, connStr string) {
 	require.NoError(t, err)
 	defer db.Close()
 
+	goose.SetLogger(goose.NopLogger())
 	err = goose.Up(db, "../migrations")
 	require.NoError(t, err)
 }
 
-func newTestServer(t testing.TB) (*httptest.Server, *pgxpool.Pool) {
+func newTestServer(t testing.TB, nower server.Nower) (*httptest.Server, *pgxpool.Pool) {
 	ctx := t.Context()
 
 	pgCont := newPgContainer(t, ctx)
@@ -61,7 +63,7 @@ func newTestServer(t testing.TB) (*httptest.Server, *pgxpool.Pool) {
 
 	pool := newPool(t, ctx, connStr)
 	q := queries.New(pool)
-	srv := httptest.NewServer(server.NewHandler(discardLogger, q))
+	srv := httptest.NewServer(server.NewHandler(discardLogger, q, nower))
 	t.Cleanup(srv.Close)
 
 	return srv, pool
@@ -87,4 +89,16 @@ func insertUserLogins(t testing.TB, pool *pgxpool.Pool, logins []queries.InsertU
 	err = pool.QueryRow(ctx, "SELECT COUNT(*) FROM user_logins").Scan(&count)
 	require.NoError(t, err)
 	require.Equal(t, len(logins), count, "row count after insert")
+}
+
+type FakeNower struct {
+	t time.Time
+}
+
+func NewFakeNower(t time.Time) *FakeNower {
+	return &FakeNower{t: t}
+}
+
+func (n *FakeNower) Now() time.Time {
+	return n.t
 }

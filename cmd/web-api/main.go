@@ -33,10 +33,8 @@ func main() {
 	}
 	defer pool.Close()
 
-	q := queries.New(pool)
-
 	srv := &http.Server{
-		Handler: server.NewHandler(logr, q),
+		Handler: server.NewHandler(logr, queries.New(pool), NewClock()),
 		Addr:    cfg.Address,
 	}
 
@@ -57,4 +55,14 @@ func main() {
 	}
 
 	logr.InfoContext(shutdownCtx, "exiting..")
+}
+
+type Clock struct{}
+
+func NewClock() *Clock {
+	return &Clock{}
+}
+
+func (c *Clock) Now() time.Time {
+	return time.Now()
 }

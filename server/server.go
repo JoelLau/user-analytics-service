@@ -3,17 +3,19 @@ package server
 import (
 	"context"
 	"net/http"
+	"time"
 	"user-analytics/queries"
 )
 
 var _ StrictServerInterface = &Server{}
 
-func NewServer(q *queries.Queries) *Server {
-	return &Server{queries: q}
+func NewServer(q *queries.Queries, clk Nower) *Server {
+	return &Server{queries: q, clock: clk}
 }
 
 type Server struct {
 	queries *queries.Queries
+	clock   Nower
 }
 
 // (GET /api/livez)
@@ -36,7 +38,18 @@ func (s *Server) Readyz(ctx context.Context, request ReadyzRequestObject) (Ready
 
 // (GET /api/v1/analytics/users/daily/{day})
 func (s *Server) GetDailyUniqueUsers(ctx context.Context, request GetDailyUniqueUsersRequestObject) (GetDailyUniqueUsersResponseObject, error) {
-	day := request.Day.Time
+	// e.g. 2026-05-22 00:00:00 UTC
+	day := request.Day.Time.UTC().Truncate(24 * time.Hour)
+	now := s.clock.Now().UTC()
+
+	if day.After(now) {
+		return GetDailyUniqueUsers400JSONResponse{
+			Type:   "https://github.com/JoelLau/user-analytics-service/errors/invalid-param",
+			Title:  "Bad Request",
+			Status: http.StatusBadRequest,
+			Detail: new("day must not be in the future"),
+		}, nil
+	}
 
 	count, err := s.queries.GetDailyUniqueUsers(ctx, day)
 	if err != nil {

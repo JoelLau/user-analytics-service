@@ -17,7 +17,7 @@ func TestLivez(t *testing.T) {
 	t.Parallel()
 
 	// Arrange
-	srv := httptest.NewServer(server.NewHandler(discardLogger, nil))
+	srv := httptest.NewServer(server.NewHandler(discardLogger, nil, NewFakeNower(time.Now())))
 	defer srv.Close()
 
 	// Act
@@ -33,7 +33,7 @@ func TestReadyz_200OK(t *testing.T) {
 	t.Parallel()
 
 	// Arrange
-	srv, _ := newTestServer(t)
+	srv, _ := newTestServer(t, NewFakeNower(time.Now()))
 
 	// Act
 	resp, err := http.Get(fmt.Sprintf("%s/api/readyz", srv.URL))
@@ -57,7 +57,7 @@ func TestReadyz_500InternalServerError(t *testing.T) {
 	require.NoError(t, err)
 
 	q := queries.New(pool)
-	srv := httptest.NewServer(server.NewHandler(discardLogger, q))
+	srv := httptest.NewServer(server.NewHandler(discardLogger, q, NewFakeNower(time.Now())))
 	t.Cleanup(srv.Close)
 
 	// Act
@@ -73,7 +73,7 @@ func TestGetDailyUniqueUsers_200OK(t *testing.T) {
 	t.Parallel()
 
 	// Arrange
-	srv, pool := newTestServer(t)
+	srv, pool := newTestServer(t, NewFakeNower(time.Now()))
 
 	insertUserLogins(t, pool, []queries.InsertUserLoginParams{
 		{UserID: 1, LoggedInAt: time.Date(2026, 3, 15, 8, 0, 0, 0, time.UTC)},
@@ -102,10 +102,29 @@ func TestGetDailyUniqueUsers_400BadRequest_InvalidDateFormat(t *testing.T) {
 	t.Parallel()
 
 	// Arrange
-	srv, _ := newTestServer(t)
+	srv, _ := newTestServer(t, NewFakeNower(time.Now()))
 
 	// Act
 	resp, err := http.Get(fmt.Sprintf("%s/api/v1/analytics/users/daily/not-a-date", srv.URL))
+	require.NoErrorf(t, err, "error on http GET: %w", err)
+	defer resp.Body.Close()
+
+	// Assert
+	require.Equal(t, http.StatusBadRequest, resp.StatusCode)
+}
+
+func TestGetDailyUniqueUsers_400BadRequest_FutureDate(t *testing.T) {
+	t.Parallel()
+
+	// Arrange
+	srv, pool := newTestServer(t, NewFakeNower(time.Date(2026, 03, 15, 0, 0, 0, 0, time.UTC))) // hardcoded "now" date
+
+	insertUserLogins(t, pool, []queries.InsertUserLoginParams{
+		{UserID: 1, LoggedInAt: time.Date(2026, 3, 15, 8, 0, 0, 0, time.UTC)},
+	})
+
+	// Act
+	resp, err := http.Get(fmt.Sprintf("%s/api/v1/analytics/users/daily/2026-03-16", srv.URL)) // hardcoded "future" date
 	require.NoErrorf(t, err, "error on http GET: %w", err)
 	defer resp.Body.Close()
 
