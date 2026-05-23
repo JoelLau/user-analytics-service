@@ -7,3 +7,9 @@ SELECT COUNT(DISTINCT user_id)
 FROM user_logins
 WHERE logged_in_at >= sqlc.arg(day)
   AND logged_in_at <  sqlc.arg(day) + INTERVAL '1 day';
+
+-- name: GetMonthlyUniqueUsers :one
+SELECT COUNT(DISTINCT user_id)
+FROM user_logins
+WHERE logged_in_at >= sqlc.arg(month)
+  AND logged_in_at <  sqlc.arg(month) + INTERVAL '1 month';

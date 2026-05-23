@@ -39,9 +39,9 @@ func errorHandlerFunc(w http.ResponseWriter, r *http.Request, err error) {
 
 	switch e := err.(type) {
 	case *InvalidParamFormatError:
-		detail = fmt.Sprintf("invalid value for '%s': %s (e.g. '%q')", e.ParamName, e.Err.Error(), paramExampleByName[e.ParamName])
+		detail = fmt.Sprintf("invalid value for '%s': %s (e.g. '%s')", e.ParamName, e.Err.Error(), paramExampleByName[e.ParamName])
 	case *RequiredParamError:
-		detail = fmt.Sprintf("'%s' is required (e.g. '%q')", e.ParamName, paramExampleByName[e.ParamName])
+		detail = fmt.Sprintf("'%s' is required (e.g. '%s')", e.ParamName, paramExampleByName[e.ParamName])
 	default:
 		detail = err.Error()
 	}

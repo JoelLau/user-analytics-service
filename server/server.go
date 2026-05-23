@@ -38,8 +38,7 @@ func (s *Server) Readyz(ctx context.Context, request ReadyzRequestObject) (Ready
 
 // (GET /api/v1/analytics/users/daily/{day})
 func (s *Server) GetDailyUniqueUsers(ctx context.Context, request GetDailyUniqueUsersRequestObject) (GetDailyUniqueUsersResponseObject, error) {
-	// e.g. 2026-05-22 00:00:00 UTC
-	day := request.Day.Time.UTC().Truncate(24 * time.Hour)
+	day := request.Day.Time.UTC()
 	now := s.clock.Now().UTC()
 
 	if day.After(now) {
@@ -61,5 +60,30 @@ func (s *Server) GetDailyUniqueUsers(ctx context.Context, request GetDailyUnique
 
 // (GET /api/v1/analytics/users/monthly/{month})
 func (s *Server) GetMonthlyUniqueUsers(ctx context.Context, request GetMonthlyUniqueUsersRequestObject) (GetMonthlyUniqueUsersResponseObject, error) {
-	return GetMonthlyUniqueUsers200JSONResponse{}, nil
+	month, err := time.Parse("2006-01", request.Month)
+	if err != nil {
+		return GetMonthlyUniqueUsers400JSONResponse{
+			Type:   "https://github.com/JoelLau/user-analytics-service/errors/invalid-param",
+			Title:  "Bad Request",
+			Status: http.StatusBadRequest,
+			Detail: new("month must be in the format YYYY-MM (e.g. 2026-05)"),
+		}, nil
+	}
+
+	month = month.UTC()
+	if month.After(s.clock.Now().UTC()) {
+		return GetMonthlyUniqueUsers400JSONResponse{
+			Type:   "https://github.com/JoelLau/user-analytics-service/errors/invalid-param",
+			Title:  "Bad Request",
+			Status: http.StatusBadRequest,
+			Detail: new("month must not be in the future"),
+		}, nil
+	}
+
+	count, err := s.queries.GetMonthlyUniqueUsers(ctx, month)
+	if err != nil {
+		return nil, err
+	}
+
+	return GetMonthlyUniqueUsers200JSONResponse{Data: new(int(count))}, nil
 }
