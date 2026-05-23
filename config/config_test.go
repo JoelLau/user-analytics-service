@@ -8,6 +8,8 @@ import (
 )
 
 func TestConfig_DSN(t *testing.T) {
+	t.Parallel()
+
 	cfg := config.Config{
 		PostgresHost:     "localhost",
 		PostgresUser:     "john.doe",

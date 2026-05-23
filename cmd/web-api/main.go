@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 	"user-analytics/config"
+	"user-analytics/queries"
 	"user-analytics/server"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -33,7 +34,7 @@ func main() {
 	defer pool.Close()
 
 	srv := &http.Server{
-		Handler: server.NewHandler(logr, pool),
+		Handler: server.NewHandler(logr, queries.New(pool), NewClock()),
 		Addr:    cfg.Address,
 	}
 
@@ -54,4 +55,14 @@ func main() {
 	}
 
 	logr.InfoContext(shutdownCtx, "exiting..")
+}
+
+type Clock struct{}
+
+func NewClock() *Clock {
+	return &Clock{}
+}
+
+func (c *Clock) Now() time.Time {
+	return time.Now()
 }
