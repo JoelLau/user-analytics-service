@@ -24,6 +24,20 @@ func (q *Queries) GetDailyUniqueUsers(ctx context.Context, day time.Time) (int64
 	return count, err
 }
 
+const getMonthlyUniqueUsers = `-- name: GetMonthlyUniqueUsers :one
+SELECT COUNT(DISTINCT user_id)
+FROM user_logins
+WHERE logged_in_at >= $1
+  AND logged_in_at <  $1 + INTERVAL '1 month'
+`
+
+func (q *Queries) GetMonthlyUniqueUsers(ctx context.Context, month time.Time) (int64, error) {
+	row := q.db.QueryRow(ctx, getMonthlyUniqueUsers, month)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const insertUserLogin = `-- name: InsertUserLogin :exec
 INSERT INTO user_logins (user_id, logged_in_at)
 VALUES ($1, $2)
