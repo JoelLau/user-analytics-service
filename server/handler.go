@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	slogchi "github.com/samber/slog-chi"
+	httpswagger "github.com/swaggo/http-swagger/v2"
 )
 
 func NewHandler(slogger *slog.Logger, q *queries.Queries, n Nower) http.Handler {
@@ -25,6 +26,17 @@ func NewHandler(slogger *slog.Logger, q *queries.Queries, n Nower) http.Handler 
 		BaseRouter:       r,
 		ErrorHandlerFunc: errorHandlerFunc,
 	})
+
+	r.Get("/api/openapi.yaml", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "openapi.yaml")
+	})
+
+	r.Get("/api/swagger", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/api/swagger/index.html", http.StatusMovedPermanently)
+	})
+	r.Get("/api/swagger/*", httpswagger.Handler(
+		httpswagger.URL("/api/openapi.yaml"),
+	))
 
 	return r
 }

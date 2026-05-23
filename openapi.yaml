@@ -18,6 +18,8 @@ paths:
                 properties:
                   data:
                     type: string
+              example:
+                data: "ok"
 
   /api/readyz:
     get:
@@ -33,21 +35,33 @@ paths:
                 properties:
                   data:
                     type: string
+              example:
+                data: "ok"
         "500":
           description: process is not ready (downstream dependency unavailable)
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                type: "https://github.com/JoelLau/user-analytics-service/errors/database-unavailable"
+                title: "Service Unavailable"
+                status: 500
+                detail: "database is not reachable"
 
   /api/v1/analytics/users/daily/{day}:
     get:
       operationId: GetDailyUniqueUsers
-      description: count of unique users for a given day (UTC)
+      description: >
+        Count of unique users who logged in on the given day (UTC).
+        The day must not be in the future.
       parameters:
         - name: day
           in: path
           required: true
+          description: >
+            The UTC date to query, in YYYY-MM-DD format.
+            Must not be a future date.
           schema:
             type: string
             format: date
@@ -62,27 +76,49 @@ paths:
                 properties:
                   data:
                     type: integer
+              example:
+                data: 42
         "400":
           description: invalid date format or future date
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalid_format:
+                  summary: invalid date format
+                  value:
+                    type: "https://github.com/JoelLau/user-analytics-service/errors/invalid-param"
+                    title: "Bad Request"
+                    status: 400
+                    detail: "invalid value for 'day': parsing time \"not-a-date\" as \"2006-01-02\": cannot parse \"not-a-date\" as \"2006\" (e.g. '2026-05-21')"
+                future_date:
+                  summary: future date
+                  value:
+                    type: "https://github.com/JoelLau/user-analytics-service/errors/invalid-param"
+                    title: "Bad Request"
+                    status: 400
+                    detail: "day must not be in the future"
 
   /api/v1/analytics/users/monthly/{month}:
     get:
       operationId: GetMonthlyUniqueUsers
-      description: count of unique users for a given UTC month
+      description: >
+        Count of unique users who logged in during the given month (UTC).
+        The month must not be in the future.
       parameters:
         - name: month
           in: path
           required: true
+          description: >
+            The UTC month to query, in YYYY-MM format.
+            Must not be a future month.
           schema:
             type: string
             example: "2026-05"
       responses:
         "200":
-          description: unique user count for the month
+          description: unique user count for the UTC month
           content:
             application/json:
               schema:
@@ -90,12 +126,29 @@ paths:
                 properties:
                   data:
                     type: integer
+              example:
+                data: 317
         "400":
           description: invalid month format or future month
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalid_format:
+                  summary: invalid month format
+                  value:
+                    type: "https://github.com/JoelLau/user-analytics-service/errors/invalid-param"
+                    title: "Bad Request"
+                    status: 400
+                    detail: "month must be in the format YYYY-MM (e.g. 2026-05)"
+                future_month:
+                  summary: future month
+                  value:
+                    type: "https://github.com/JoelLau/user-analytics-service/errors/invalid-param"
+                    title: "Bad Request"
+                    status: 400
+                    detail: "month must not be in the future"
 
 components:
   schemas:

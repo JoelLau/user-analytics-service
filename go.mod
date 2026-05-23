@@ -22,6 +22,7 @@ require (
 	dario.cat/mergo v1.0.2 // indirect
 	filippo.io/edwards25519 v1.2.0 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20250102033503-faa5f7b0171c // indirect
+	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect
 	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
@@ -47,6 +48,9 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/go-openapi/jsonpointer v0.22.4 // indirect
+	github.com/go-openapi/jsonreference v0.20.0 // indirect
+	github.com/go-openapi/spec v0.20.6 // indirect
+	github.com/go-openapi/swag v0.23.0 // indirect
 	github.com/go-openapi/swag/jsonname v0.25.4 // indirect
 	github.com/go-sql-driver/mysql v1.9.3 // indirect
 	github.com/golobby/cast v1.3.3 // indirect
@@ -99,6 +103,9 @@ require (
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/sqlc-dev/doubleclick v1.0.0 // indirect
 	github.com/sqlc-dev/sqlc v1.31.1 // indirect
+	github.com/swaggo/files/v2 v2.0.0 // indirect
+	github.com/swaggo/http-swagger/v2 v2.0.2 // indirect
+	github.com/swaggo/swag v1.8.1 // indirect
 	github.com/testcontainers/testcontainers-go v0.42.0 // indirect
 	github.com/tetratelabs/wazero v1.11.0 // indirect
 	github.com/tklauser/go-sysconf v0.3.16 // indirect
